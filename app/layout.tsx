@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { Toaster } from 'react-hot-toast';
 import ReduxProvider from './components/ReduxProvider';
+import MaintenanceChecker from './components/MaintenanceChecker';
 import "./globals.css";
 
 const poppins = Poppins({
@@ -35,28 +35,36 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${poppins.variable} antialiased`}
+        suppressHydrationWarning
       >
         <ReduxProvider>
-          {children}
+          <MaintenanceChecker>
+            {children}
+          </MaintenanceChecker>
         </ReduxProvider>
-        <ToastContainer
+        <Toaster
           position="top-center"
-          autoClose={3000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme="dark"
-          toastStyle={{
-            backgroundColor: '#232426',
-            color: '#ffffff',
-            border: '1px solid #7F8CAA'
+          toastOptions={{
+            style: {
+              background: '#333',
+              color: '#fff',
+              border: '1px solid #7F8CAA',
+            },
+            success: {
+              style: {
+                background: '#232426',
+                border: '1px solid #4CAF50',
+              },
+            },
+            error: {
+              style: {
+                background: '#232426',
+                border: '1px solid #EF4444',
+              },
+            },
           }}
         />
       </body>

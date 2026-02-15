@@ -98,12 +98,12 @@ const OrderStatusPage: React.FC<OrderStatusPageProps> = ({ onNavigate }) => {
 
     // Check for orderId in URL params
     const orderId = getUrlParam('orderId') ||
-                   searchParams?.get('orderId') ||
-                   getUrlParam('order_id') ||
-                   searchParams?.get('order_id');
+      searchParams?.get('orderId') ||
+      getUrlParam('order_id') ||
+      searchParams?.get('order_id');
 
-    console.log('useEffect - URL params:', { 
-      orderId, 
+    console.log('useEffect - URL params:', {
+      orderId,
       searchParams: searchParams?.toString(),
       windowLocation: typeof window !== 'undefined' ? window.location.search : 'N/A'
     });
@@ -142,7 +142,7 @@ const OrderStatusPage: React.FC<OrderStatusPageProps> = ({ onNavigate }) => {
   if (isLoading) {
     return (
       <div className="min-h-screen relative overflow-hidden p-0 m-0" style={{ backgroundColor: '#232426' }}>
-        <TopSection showLogo={true} />
+        <TopSection showLogo={true} onNavigate={onNavigate} />
         <div className="flex items-center justify-center py-20">
           <div className="text-white text-base sm:text-xl">Loading order status...</div>
         </div>
@@ -153,7 +153,7 @@ const OrderStatusPage: React.FC<OrderStatusPageProps> = ({ onNavigate }) => {
 
   const getStatusConfig = (status: OrderStatus | undefined) => {
     if (!status) return { icon: null, text: 'Unknown Status', bgColor: '#6B7280', textColor: 'text-gray-400' };
-    
+
     switch (status) {
       case 'completed':
         return {
@@ -224,23 +224,23 @@ const OrderStatusPage: React.FC<OrderStatusPageProps> = ({ onNavigate }) => {
       <div className="w-full">
         {/* Top Section with Logo */}
         <div className="relative z-10">
-          <TopSection showLogo={true} />
+          <TopSection showLogo={true} onNavigate={onNavigate} />
         </div>
 
         {/* Status Section */}
         <div className="flex flex-col items-center py-6">
           {/* Status Icon */}
-          <div 
+          <div
             className="rounded-full flex items-center justify-center mb-4"
-            style={{ 
-              width: '80px', 
+            style={{
+              width: '80px',
               height: '80px',
               backgroundColor: statusConfig.bgColor
             }}
           >
             {statusConfig.icon}
           </div>
-          
+
           {/* Status Text */}
           <h1 className="text-white font-bold mb-2 text-2xl sm:text-3xl text-center">
             {error ? 'Error' : statusConfig.text}
@@ -255,9 +255,9 @@ const OrderStatusPage: React.FC<OrderStatusPageProps> = ({ onNavigate }) => {
         {/* Order Details Card */}
         {orderData && orderData.order && (
           <div className="px-4 md:px-6 lg:px-8 mb-6">
-            <div 
+            <div
               className="p-4 rounded-lg"
-              style={{ 
+              style={{
                 background: 'linear-gradient(90deg, #7F8CAA 0%, #5C667C 100%)',
                 boxShadow: '0px 4px 4px 0px #00000040'
               }}
@@ -286,7 +286,7 @@ const OrderStatusPage: React.FC<OrderStatusPageProps> = ({ onNavigate }) => {
                     {orderData.orderId}
                   </div>
                   <div className="text-white text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>
-                    {orderData.order.items && orderData.order.items.length > 0 
+                    {orderData.order.items && orderData.order.items.length > 0
                       ? orderData.order.items.map(item => item.itemName).join(', ')
                       : 'N/A'}
                   </div>
@@ -302,7 +302,7 @@ const OrderStatusPage: React.FC<OrderStatusPageProps> = ({ onNavigate }) => {
                   <div className="text-white text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>
                     {orderData.order.paymentMethod ? orderData.order.paymentMethod.charAt(0).toUpperCase() + orderData.order.paymentMethod.slice(1) : 'N/A'}
                   </div>
-                  <div 
+                  <div
                     className={`text-sm font-medium ${statusConfig.textColor}`}
                     style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}
                   >
@@ -314,9 +314,9 @@ const OrderStatusPage: React.FC<OrderStatusPageProps> = ({ onNavigate }) => {
 
             {/* Performance Info */}
             {orderData.performance && (
-              <div 
+              <div
                 className="p-4 rounded-lg mt-4"
-                style={{ 
+                style={{
                   background: 'linear-gradient(90deg, #7F8CAA 0%, #5C667C 100%)',
                   boxShadow: '0px 4px 4px 0px #00000040'
                 }}
@@ -325,8 +325,8 @@ const OrderStatusPage: React.FC<OrderStatusPageProps> = ({ onNavigate }) => {
                   Processing Info
                 </div>
                 <div className="text-gray-300 text-xs" style={{ fontFamily: 'Poppins', fontSize: '12px' }}>
-                  Total Providers: {orderData.performance.totalProviders} | 
-                  Successful: {orderData.performance.successfulCount} | 
+                  Total Providers: {orderData.performance.totalProviders} |
+                  Successful: {orderData.performance.successfulCount} |
                   Failed: {orderData.performance.failedCount}
                 </div>
                 {orderData.successfulProviders && orderData.successfulProviders.length > 0 && (
@@ -347,14 +347,14 @@ const OrderStatusPage: React.FC<OrderStatusPageProps> = ({ onNavigate }) => {
         {/* Action Buttons */}
         <div className="px-4 md:px-6 lg:px-8 mb-8">
           <div className="flex gap-4">
-            <button 
+            <button
               className="flex-1 py-3 px-4 rounded-4xl border-2 border-white text-white"
               style={{ fontSize: '16px', backgroundColor: 'transparent' }}
-              onClick={() => onNavigate ? onNavigate('topup') : router.push('/topup')}
+              onClick={() => onNavigate ? onNavigate('topup') : router.push('/')}
             >
               Top Up Again
             </button>
-            <button 
+            <button
               className="flex-1 py-3 px-4 rounded-4xl text-white"
               style={{ backgroundColor: 'rgb(75, 85, 99)', fontSize: '16px' }}
               onClick={() => onNavigate ? onNavigate('orders') : router.push('/orders')}

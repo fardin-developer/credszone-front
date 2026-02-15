@@ -17,36 +17,7 @@ export default function RefundPage({ onNavigate }: RefundPageProps = {}) {
       <div className="w-full">
         {/* Top Section with Logo */}
         <div className="relative z-10">
-          <TopSection showLogo={true} />
-        </div>
-
-        {/* Back Button */}
-        <div className="px-4 md:px-6 lg:px-8 mb-4">
-          <button
-            type="button"
-            onClick={() => {
-              if (onNavigate) {
-                onNavigate('home');
-              } else {
-                router.push('/dashboard');
-              }
-            }}
-            className="flex items-center cursor-pointer"
-            style={{
-              color: '#7F8CAA',
-              fontFamily: 'Poppins',
-              fontWeight: 700,
-              fontStyle: 'normal',
-              fontSize: '16px',
-              lineHeight: '100%',
-              letterSpacing: '0%'
-            }}
-          >
-            <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110-2H5.414l4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
-            </svg>
-            go back
-          </button>
+          <TopSection showLogo={true} onNavigate={onNavigate} />
         </div>
 
         {/* Page Title */}
@@ -57,9 +28,9 @@ export default function RefundPage({ onNavigate }: RefundPageProps = {}) {
 
         {/* Content */}
         <div className="px-4 md:px-6 lg:px-8 pb-24">
-          <div 
+          <div
             className="p-6 rounded-2xl"
-            style={{ 
+            style={{
               background: 'linear-gradient(90deg, #7F8CAA 0%, #5C667C 100%)',
               boxShadow: '0px 4px 4px 0px #00000040'
             }}
@@ -79,9 +50,9 @@ export default function RefundPage({ onNavigate }: RefundPageProps = {}) {
               </section>
 
               <section>
-                <div 
+                <div
                   className="p-4 rounded-lg mb-4"
-                  style={{ 
+                  style={{
                     backgroundColor: 'rgba(255, 193, 7, 0.2)',
                     border: '2px solid rgba(255, 193, 7, 0.5)'
                   }}

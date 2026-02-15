@@ -218,7 +218,7 @@ export default function OrderHistoryPage({ onNavigate }: OrderHistoryPageProps =
       // Also fetch dashboard data to get the latest balance
       const fetchDashboardBalance = async () => {
         try {
-          const response = await apiClient.get('/user/dashboard');
+          const response = await apiClient.get('/user/me');
           if (response.data.data?.walletBalance !== undefined) {
             setWalletBalance(response.data.data.walletBalance);
           }
@@ -472,9 +472,8 @@ export default function OrderHistoryPage({ onNavigate }: OrderHistoryPageProps =
     <div className="min-h-screen relative overflow-hidden p-0 m-0" style={{ backgroundColor: '#232426' }}>
       {/* Desktop Container */}
       <div className="w-full">
-        {/* Top Section with Logo */}
         <div className="relative z-10">
-          <TopSection showLogo={true} />
+          <TopSection showLogo={true} onNavigate={onNavigate} />
         </div>
 
         {/* Tabs */}
@@ -484,8 +483,8 @@ export default function OrderHistoryPage({ onNavigate }: OrderHistoryPageProps =
               type="button"
               onClick={() => setActiveTab('orders')}
               className={`flex-1 py-3 px-4 rounded-lg font-medium transition-colors text-sm cursor-pointer ${activeTab === 'orders'
-                  ? 'text-white'
-                  : 'text-gray-400 hover:text-white'
+                ? 'text-white'
+                : 'text-gray-400 hover:text-white'
                 }`}
               style={{
                 backgroundColor: activeTab === 'orders' ? 'rgb(75, 85, 99)' : 'transparent',
@@ -500,8 +499,8 @@ export default function OrderHistoryPage({ onNavigate }: OrderHistoryPageProps =
               type="button"
               onClick={() => setActiveTab('wallet')}
               className={`flex-1 py-3 px-4 rounded-lg font-medium transition-colors text-sm cursor-pointer ${activeTab === 'wallet'
-                  ? 'text-white'
-                  : 'text-gray-400 hover:text-white'
+                ? 'text-white'
+                : 'text-gray-400 hover:text-white'
                 }`}
               style={{
                 backgroundColor: activeTab === 'wallet' ? 'rgb(75, 85, 99)' : 'transparent',
@@ -516,8 +515,8 @@ export default function OrderHistoryPage({ onNavigate }: OrderHistoryPageProps =
               type="button"
               onClick={() => setActiveTab('payment')}
               className={`flex-1 py-3 px-4 rounded-lg font-medium transition-colors text-sm cursor-pointer ${activeTab === 'payment'
-                  ? 'text-white'
-                  : 'text-gray-400 hover:text-white'
+                ? 'text-white'
+                : 'text-gray-400 hover:text-white'
                 }`}
               style={{
                 backgroundColor: activeTab === 'payment' ? 'rgb(75, 85, 99)' : 'transparent',

@@ -12,9 +12,9 @@ interface BottomNavigationProps {
 
 export default function BottomNavigation({ onNavigate }: BottomNavigationProps = {}) {
   const router = useRouter();
-  
+
   return (
-    <nav 
+    <nav
       aria-label="Bottom Navigation"
       className="fixed p-3 sm:p-4 z-40 left-4 right-4 sm:left-8 sm:right-8 md:left-1/2 md:-translate-x-1/2 md:max-w-2xl"
       style={{
@@ -26,31 +26,31 @@ export default function BottomNavigation({ onNavigate }: BottomNavigationProps =
     >
       <div className="flex justify-around">
         {/* Home */}
-        <div 
+        <div
           className="flex items-center justify-center cursor-pointer"
-          onClick={() => onNavigate ? onNavigate('home') : router.push('/dashboard')}
+          onClick={() => onNavigate ? onNavigate('home') : router.push('/')}
         >
           <IoMdHome className="w-6 h-6 text-white" />
         </div>
-        
+
         {/* Profile */}
-        <div 
+        <div
           className="flex items-center justify-center cursor-pointer"
           onClick={() => router.push('/profile')}
         >
           <LuGrid2X2 className="w-6 h-6 text-white" />
         </div>
-        
+
         {/* Orders */}
-        <div 
+        <div
           className="flex items-center justify-center cursor-pointer"
           onClick={() => router.push('/orders')}
         >
           <GiShoppingBag className="w-6 h-6 text-white" />
         </div>
-        
+
         {/* News */}
-        <div 
+        <div
           className="flex items-center justify-center cursor-pointer"
           onClick={() => router.push('/news')}
         >

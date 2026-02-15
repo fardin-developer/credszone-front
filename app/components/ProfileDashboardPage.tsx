@@ -29,7 +29,7 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
-    
+
   });
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -51,10 +51,10 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
     try {
       if (!token) {
         if (onNavigate) {
-        onNavigate('login');
-      } else {
-        router.push('/login');
-      }
+          onNavigate('login');
+        } else {
+          router.push('/login');
+        }
         return;
       }
 
@@ -126,14 +126,14 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
           'Content-Type': 'multipart/form-data',
         },
       });
-      
+
       const responseData = response.data;
       // toast.success(responseData.message || 'Profile picture updated successfully!');
-      
+
       // Reset image selection
       setSelectedImage(null);
       setImagePreview(null);
-      
+
       // Refresh user data to show new picture
       fetchUserData();
     } catch (error: any) {
@@ -159,10 +159,10 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
       const token = localStorage.getItem('authToken');
       if (!token) {
         if (onNavigate) {
-        onNavigate('login');
-      } else {
-        router.push('/login');
-      }
+          onNavigate('login');
+        } else {
+          router.push('/login');
+        }
         return;
       }
 
@@ -174,9 +174,9 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
 
       const response = await apiClient.put('/user/profile', requestBody);
       const responseData = response.data;
-      
+
       // toast.success(responseData.message || 'Profile updated successfully!');
-      
+
       // Refresh user data
       fetchUserData();
     } catch (error) {
@@ -202,28 +202,12 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
     <div className="min-h-screen relative overflow-hidden p-0 m-0 w-full" style={{ backgroundColor: '#232426' }}>
       {/* Top Section with Logo */}
       <div className="relative z-10">
-        <TopSection showLogo={true} />
+        <TopSection showLogo={true} onNavigate={onNavigate} />
       </div>
 
-        {/* Go Back Link */}
-        <div className="px-4 md:px-6 lg:px-8 mb-4">
-        <button 
-          type="button"
-          className="cursor-pointer"
-          style={{
-            fontSize: '16px',
-            color: '#7F8CAA',
-            fontWeight: 700
-          }}
-          onClick={() => router.back()}
-        >
-          ← go back
-        </button>
-      </div>
-
-        {/* Welcome Section */}
-        <div className="px-4 md:px-6 lg:px-8 mb-6">
-        <h1 
+      {/* Welcome Section */}
+      <div className="px-4 md:px-6 lg:px-8 mb-6">
+        <h1
           className="text-white font-bold text-xl sm:text-2xl"
           style={{ fontSize: '24px' }}
         >
@@ -231,11 +215,11 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
         </h1>
       </div>
 
-        {/* User Profile Card */}
-        <div className="px-4 md:px-6 lg:px-8 mb-6">
-        <div 
+      {/* User Profile Card */}
+      <div className="px-4 md:px-6 lg:px-8 mb-6">
+        <div
           className="p-6 rounded-2xl"
-          style={{ 
+          style={{
             background: 'linear-gradient(180deg, #232426 0%, #454B57 100%)',
             boxShadow: '0px 4px 4px 0px #00000040'
           }}
@@ -243,25 +227,25 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
           {/* User Avatar and Info */}
           <div className="flex items-center mb-6">
             <div className="relative mr-4">
-              <div 
+              <div
                 className="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center border-2 overflow-hidden"
-                style={{ 
+                style={{
                   backgroundColor: '#232426',
                   borderColor: 'white',
                   boxShadow: '0px 2px 7px 0px white'
                 }}
               >
                 {imagePreview ? (
-                  <img 
-                    src={imagePreview} 
-                    alt="Profile" 
+                  <img
+                    src={imagePreview}
+                    alt="Profile"
                     className="w-full h-full object-cover"
                   />
                 ) : userData?.profilePicture ? (
                   <>
-                    <img 
-                      src={userData.profilePicture} 
-                      alt="Profile" 
+                    <img
+                      src={userData.profilePicture}
+                      alt="Profile"
                       className="w-full h-full object-cover"
                       loading="lazy"
                       onError={(e) => {
@@ -276,7 +260,7 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
                         e.currentTarget.style.display = 'none';
                       }}
                     />
-                    <span 
+                    <span
                       className="text-white font-bold profile-initial"
                       style={{ fontSize: '20px', display: 'none' }}
                     >
@@ -284,7 +268,7 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
                     </span>
                   </>
                 ) : (
-                  <span 
+                  <span
                     className="text-white font-bold"
                     style={{ fontSize: '20px' }}
                   >
@@ -303,7 +287,7 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
               </div>
             </div>
             <div>
-              <h3 
+              <h3
                 className="text-white font-bold"
                 style={{ fontSize: '16px' }}
               >
@@ -316,16 +300,16 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
           {/* Show upload button when image is selected */}
           {selectedImage && (
             <div className="mb-4 flex flex-col items-center space-y-2">
-              <img 
-                src={imagePreview!} 
-                alt="Preview" 
+              <img
+                src={imagePreview!}
+                alt="Preview"
                 className="w-24 h-24 rounded-full object-cover border-2 border-white"
               />
               <button
                 onClick={handleImageUpload}
                 disabled={isUploadingPicture}
                 className="text-white font-medium py-2 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{ 
+                style={{
                   backgroundColor: '#7F8CAA',
                   fontSize: '14px'
                 }}
@@ -380,7 +364,7 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
               onClick={handleUpdate}
               disabled={isUpdating}
               className="text-white font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{ 
+              style={{
                 backgroundColor: '#232426',
                 boxShadow: '0px 4px 4px 0px #00000040',
                 padding: '10px 30px',
@@ -397,17 +381,17 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
 
       {/* Combined Balance and Actions Card */}
       <div className="px-4 mb-8">
-        <div 
+        <div
           className="p-2 rounded-2xl"
-          style={{ 
+          style={{
             backgroundColor: 'rgb(54, 59, 72)',
             boxShadow: 'rgba(0, 0, 0, 0.25) 0px 4px 4px 0px'
           }}
         >
           {/* CRED Coins Balance Section */}
-          <div 
+          <div
             className="flex items-center justify-between p-4 rounded-2xl mb-6"
-            style={{ 
+            style={{
               background: 'linear-gradient(90deg, rgb(38, 39, 42) 0%, rgb(67, 72, 84) 100%)',
               boxShadow: 'rgba(0, 0, 0, 0.25) 0px 4px 4px 0px',
               border: '1px solid white'
@@ -426,7 +410,7 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
               </div>
               <div>
                 <p className="text-white text-sm">CRED Coins</p>
-                <p 
+                <p
                   className="text-white font-bold"
                   style={{ fontSize: '16px' }}
                 >
@@ -434,9 +418,9 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
                 </p>
               </div>
             </div>
-            <div 
+            <div
               className="px-3 py-1 rounded-lg text-white text-sm"
-              style={{ 
+              style={{
                 backgroundColor: 'rgb(54, 59, 72)',
                 border: '1px solid white',
                 fontSize: '16px',
@@ -450,31 +434,31 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
           {/* Action Buttons Section */}
           <div className="grid grid-cols-3 gap-4">
             {/* Orders Button */}
-            <div 
+            <div
               className="flex flex-col items-center cursor-pointer"
               onClick={() => onNavigate ? onNavigate('orders') : router.push('/orders')}
             >
-              <div 
+              <div
                 className="rounded-2xl flex items-center justify-center mb-2"
-                style={{ 
+                style={{
                   background: 'linear-gradient(90deg, #7F8CAA 0%, #333844 100%)',
                   boxShadow: 'rgba(0, 0, 0, 0.2) 0px 4px 8px',
                   width: '90px',
                   height: '90px'
                 }}
               >
-                <svg 
-                  className="w-10 h-10 sm:w-12 sm:h-12 text-white" 
-                  fill="currentColor" 
+                <svg
+                  className="w-10 h-10 sm:w-12 sm:h-12 text-white"
+                  fill="currentColor"
                   viewBox="0 0 20 20"
                   style={{ height: '50px' }}
                 >
                   <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
                 </svg>
               </div>
-              <div 
+              <div
                 className="rounded-full"
-                style={{ 
+                style={{
                   backgroundColor: 'rgb(44, 44, 44)',
                   boxShadow: 'rgba(0, 0, 0, 0.3) 0px 2px 4px',
                   marginTop: '-20px',
@@ -489,31 +473,31 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
             </div>
 
             {/* Cart Button */}
-            <div 
+            <div
               className="flex flex-col items-center cursor-pointer"
-              onClick={() => onNavigate ? onNavigate('topup') : router.push('/topup')}
+              onClick={() => onNavigate ? onNavigate('topup') : router.push('/')}
             >
-              <div 
+              <div
                 className="rounded-2xl flex items-center justify-center mb-2"
-                style={{ 
+                style={{
                   background: 'linear-gradient(90deg, #7F8CAA 0%, #333844 100%)',
                   boxShadow: 'rgba(0, 0, 0, 0.2) 0px 4px 8px',
                   width: '90px',
                   height: '90px'
                 }}
               >
-                <svg 
-                  className="w-10 h-10 sm:w-12 sm:h-12 text-white" 
-                  fill="currentColor" 
+                <svg
+                  className="w-10 h-10 sm:w-12 sm:h-12 text-white"
+                  fill="currentColor"
                   viewBox="0 0 20 20"
                   style={{ height: '50px' }}
                 >
-                  <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"/>
+                  <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" />
                 </svg>
               </div>
-              <div 
+              <div
                 className="rounded-full"
-                style={{ 
+                style={{
                   backgroundColor: 'rgb(44, 44, 44)',
                   boxShadow: 'rgba(0, 0, 0, 0.3) 0px 2px 4px',
                   marginTop: '-20px',
@@ -528,31 +512,31 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
             </div>
 
             {/* Queries Button */}
-            <div 
+            <div
               className="flex flex-col items-center cursor-pointer"
               onClick={() => onNavigate ? onNavigate('contact') : router.push('/contact')}
             >
-              <div 
+              <div
                 className="rounded-2xl flex items-center justify-center mb-2"
-                style={{ 
+                style={{
                   background: 'linear-gradient(90deg, #7F8CAA 0%, #333844 100%)',
                   boxShadow: 'rgba(0, 0, 0, 0.2) 0px 4px 8px',
                   width: '90px',
                   height: '90px'
                 }}
               >
-                <svg 
-                  className="w-10 h-10 sm:w-12 sm:h-12 text-white" 
-                  fill="currentColor" 
+                <svg
+                  className="w-10 h-10 sm:w-12 sm:h-12 text-white"
+                  fill="currentColor"
                   viewBox="0 0 20 20"
                   style={{ height: '50px' }}
                 >
                   <path fillRule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clipRule="evenodd" />
                 </svg>
               </div>
-              <div 
+              <div
                 className="rounded-full"
-                style={{ 
+                style={{
                   backgroundColor: 'rgb(44, 44, 44)',
                   boxShadow: 'rgba(0, 0, 0, 0.3) 0px 2px 4px',
                   marginTop: '-20px',
@@ -569,11 +553,11 @@ export default function ProfileDashboardPage({ onNavigate }: ProfileDashboardPag
         </div>
       </div>
 
-        {/* Bottom Spacing for Fixed Navigation */}
-        <div className="h-15"></div>
+      {/* Bottom Spacing for Fixed Navigation */}
+      <div className="h-15"></div>
 
-        {/* Bottom Navigation */}
-        <BottomNavigation />
+      {/* Bottom Navigation */}
+      <BottomNavigation />
     </div>
   );
 }

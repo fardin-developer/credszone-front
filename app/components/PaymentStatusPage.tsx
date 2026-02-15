@@ -88,23 +88,23 @@ const PaymentStatusPage: React.FC<PaymentStatusPageProps> = ({ onNavigate }) => 
     // Check for clientTrxId (with lowercase 'x') first, then clientTxnId, then client_txn_id
     // The payment gateway sends clientTrxId in the URL
     const clientTxnId = getUrlParam('clientTrxId') ||
-                       searchParams?.get('clientTrxId') ||
-                       getUrlParam('clientTxnId') ||
-                       searchParams?.get('clientTxnId') ||
-                       getUrlParam('client_txn_id') ||
-                       searchParams?.get('client_txn_id');
-    
+      searchParams?.get('clientTrxId') ||
+      getUrlParam('clientTxnId') ||
+      searchParams?.get('clientTxnId') ||
+      getUrlParam('client_txn_id') ||
+      searchParams?.get('client_txn_id');
+
     // Check for transactionId (from payment gateway), txnId, then txn_id
     const txnId = getUrlParam('transactionId') ||
-                  searchParams?.get('transactionId') ||
-                  getUrlParam('txnId') ||
-                  searchParams?.get('txnId') ||
-                  getUrlParam('txn_id') ||
-                  searchParams?.get('txn_id');
+      searchParams?.get('transactionId') ||
+      getUrlParam('txnId') ||
+      searchParams?.get('txnId') ||
+      getUrlParam('txn_id') ||
+      searchParams?.get('txn_id');
 
-    console.log('useEffect - URL params:', { 
-      clientTxnId, 
-      txnId, 
+    console.log('useEffect - URL params:', {
+      clientTxnId,
+      txnId,
       searchParams: searchParams?.toString(),
       windowLocation: typeof window !== 'undefined' ? window.location.search : 'N/A'
     });
@@ -134,7 +134,7 @@ const PaymentStatusPage: React.FC<PaymentStatusPageProps> = ({ onNavigate }) => 
   if (isLoading) {
     return (
       <div className="min-h-screen relative overflow-hidden p-0 m-0" style={{ backgroundColor: '#232426' }}>
-        <TopSection showLogo={true} />
+        <TopSection showLogo={true} onNavigate={onNavigate} />
         <div className="flex items-center justify-center py-20">
           <div className="text-white text-base sm:text-xl">Loading transaction status...</div>
         </div>
@@ -145,7 +145,7 @@ const PaymentStatusPage: React.FC<PaymentStatusPageProps> = ({ onNavigate }) => 
 
   const getStatusConfig = (status: TransactionStatus | undefined) => {
     if (!status) return { icon: null, text: 'Unknown Status', bgColor: '#6B7280', textColor: 'text-gray-400' };
-    
+
     switch (status) {
       case 'success':
         return {
@@ -216,114 +216,114 @@ const PaymentStatusPage: React.FC<PaymentStatusPageProps> = ({ onNavigate }) => 
       <div className="w-full">
         {/* Top Section with Logo */}
         <div className="relative z-10">
-          <TopSection showLogo={true} />
+          <TopSection showLogo={true} onNavigate={onNavigate} />
         </div>
 
         {/* Status Section */}
         <div className="flex flex-col items-center py-6">
-        {/* Status Icon */}
-        <div 
-          className="rounded-full flex items-center justify-center mb-4"
-          style={{ 
-            width: '80px', 
-            height: '80px',
-            backgroundColor: statusConfig.bgColor
-          }}
-        >
-          {statusConfig.icon}
+          {/* Status Icon */}
+          <div
+            className="rounded-full flex items-center justify-center mb-4"
+            style={{
+              width: '80px',
+              height: '80px',
+              backgroundColor: statusConfig.bgColor
+            }}
+          >
+            {statusConfig.icon}
+          </div>
+
+          {/* Status Text */}
+          <h1 className="text-white font-bold mb-2 text-2xl sm:text-3xl text-center">
+            {error ? 'Error' : statusConfig.text}
+          </h1>
+          {error && (
+            <p className="text-red-400 text-sm mt-2 text-center px-4">
+              {error}
+            </p>
+          )}
         </div>
-        
-        {/* Status Text */}
-        <h1 className="text-white font-bold mb-2 text-2xl sm:text-3xl text-center">
-          {error ? 'Error' : statusConfig.text}
-        </h1>
-        {error && (
-          <p className="text-red-400 text-sm mt-2 text-center px-4">
-            {error}
-          </p>
-        )}
-      </div>
 
         {/* Transaction Details Card */}
         {transactionData && (
           <div className="px-4 md:px-6 lg:px-8 mb-6">
-          <div 
-            className="p-4 rounded-lg"
-            style={{ 
-              background: 'linear-gradient(90deg, #7F8CAA 0%, #5C667C 100%)',
-              boxShadow: '0px 4px 4px 0px #00000040'
-            }}
-          >
-            <div className="flex">
-              {/* Left Column - Labels */}
-              <div className="space-y-3" style={{ width: '120px' }}>
-                <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Order Date</div>
-                <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Order ID</div>
-                <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Product</div>
-                <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Order Details</div>
-                <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Price</div>
-                <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>User ID</div>
-                <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Zone ID</div>
-                <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Status</div>
-              </div>
+            <div
+              className="p-4 rounded-lg"
+              style={{
+                background: 'linear-gradient(90deg, #7F8CAA 0%, #5C667C 100%)',
+                boxShadow: '0px 4px 4px 0px #00000040'
+              }}
+            >
+              <div className="flex">
+                {/* Left Column - Labels */}
+                <div className="space-y-3" style={{ width: '120px' }}>
+                  <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Order Date</div>
+                  <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Order ID</div>
+                  <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Product</div>
+                  <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Order Details</div>
+                  <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Price</div>
+                  <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>User ID</div>
+                  <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Zone ID</div>
+                  <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>Status</div>
+                </div>
 
-              {/* Vertical Divider */}
-              <div className="w-px bg-white mx-4"></div>
+                {/* Vertical Divider */}
+                <div className="w-px bg-white mx-4"></div>
 
-              {/* Right Column - Values */}
-              <div className="flex-1 space-y-3">
-                <div className="text-green-400 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>
-                  {formatDate(transactionData.createdAt)}
-                </div>
-                <div className="text-blue-400 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>
-                  {transactionData.orderId}
-                </div>
-                <div className="text-white text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>
-                  {transactionData.customerName}
-                </div>
-                <div className="text-white text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>
-                  {transactionData.paymentNote || 'N/A'}
-                </div>
-                <div className="text-white text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>
-                  {transactionData.amount} INR
-                </div>
-                <div className="text-blue-400 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>
-                  {transactionData.customerNumber}
-                </div>
-                <div className="text-white text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>
-                  {transactionData.customerEmail}
-                </div>
-                <div 
-                  className={`text-sm font-medium ${statusConfig.textColor}`}
-                  style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}
-                >
-                  {transactionData.status.charAt(0).toUpperCase() + transactionData.status.slice(1)}
+                {/* Right Column - Values */}
+                <div className="flex-1 space-y-3">
+                  <div className="text-green-400 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>
+                    {formatDate(transactionData.createdAt)}
+                  </div>
+                  <div className="text-blue-400 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>
+                    {transactionData.orderId}
+                  </div>
+                  <div className="text-white text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>
+                    {transactionData.customerName}
+                  </div>
+                  <div className="text-white text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>
+                    {transactionData.paymentNote || 'N/A'}
+                  </div>
+                  <div className="text-white text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>
+                    {transactionData.amount} INR
+                  </div>
+                  <div className="text-blue-400 text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>
+                    {transactionData.customerNumber}
+                  </div>
+                  <div className="text-white text-sm" style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}>
+                    {transactionData.customerEmail}
+                  </div>
+                  <div
+                    className={`text-sm font-medium ${statusConfig.textColor}`}
+                    style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', lineHeight: '100%', letterSpacing: '0%' }}
+                  >
+                    {transactionData.status.charAt(0).toUpperCase() + transactionData.status.slice(1)}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
         {/* Action Buttons */}
         <div className="px-4 md:px-6 lg:px-8 mb-8">
-        <div className="flex gap-4">
-          <button 
-            className="flex-1 py-3 px-4 rounded-4xl border-2 border-white text-white"
-            style={{ fontSize: '16px', backgroundColor: 'transparent' }}
-            onClick={() => onNavigate ? onNavigate('topup') : router.push('/topup')}
-          >
-            Top Up Again
-          </button>
-          <button 
-            className="flex-1 py-3 px-4 rounded-4xl text-white"
-            style={{ backgroundColor: 'rgb(75, 85, 99)', fontSize: '16px' }}
-            onClick={() => onNavigate ? onNavigate('orders') : router.push('/orders')}
-          >
-            Order History
-          </button>
+          <div className="flex gap-4">
+            <button
+              className="flex-1 py-3 px-4 rounded-4xl border-2 border-white text-white"
+              style={{ fontSize: '16px', backgroundColor: 'transparent' }}
+              onClick={() => onNavigate ? onNavigate('topup') : router.push('/')}
+            >
+              Top Up Again
+            </button>
+            <button
+              className="flex-1 py-3 px-4 rounded-4xl text-white"
+              style={{ backgroundColor: 'rgb(75, 85, 99)', fontSize: '16px' }}
+              onClick={() => onNavigate ? onNavigate('orders') : router.push('/orders')}
+            >
+              Order History
+            </button>
+          </div>
         </div>
-      </div>
 
         {/* Bottom Spacing for Fixed Navigation */}
         <div className="h-15"></div>

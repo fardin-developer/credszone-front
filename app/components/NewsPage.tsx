@@ -102,7 +102,7 @@ export default function NewsPage({ onNavigate }: NewsPageProps = {}) {
     const minutes = date.getMinutes().toString().padStart(2, '0');
     const ampm = hours >= 12 ? 'pm' : 'am';
     const displayHours = hours % 12 || 12;
-    
+
     return `${day}/${month}/${year}, ${displayHours}:${minutes} ${ampm}`;
   };
 
@@ -201,112 +201,84 @@ export default function NewsPage({ onNavigate }: NewsPageProps = {}) {
     <div className="min-h-screen relative overflow-hidden p-0 m-0" style={{ backgroundColor: '#232426' }}>
       {/* Desktop Container */}
       <div className="w-full">
-        {/* Top Section with Logo */}
         <div className="relative z-10">
-          <TopSection showLogo={true} />
+          <TopSection showLogo={true} onNavigate={onNavigate} />
         </div>
 
-        {/* Back Button */}
-        <div className="px-4 md:px-6 lg:px-8 mb-4">
-        <button
-          onClick={() => {
-            if (onNavigate) {
-              onNavigate('home');
-            } else {
-              router.push('/dashboard');
-            }
-          }}
-          className="flex items-center cursor-pointer"
-          style={{
-            color: '#7F8CAA',
-            fontFamily: 'Poppins',
-            fontWeight: 700,
-            fontStyle: 'normal',
-            fontSize: '16px',
-            lineHeight: '100%',
-            letterSpacing: '0%'
-          }}
-        >
-          <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
-          </svg>
-          go back
-        </button>
-      </div>
 
         {/* Page Title */}
         <div className="px-4 md:px-6 lg:px-8 mb-6">
-        <h1 className="text-white font-bold text-xl sm:text-2xl">News & Announcements</h1>
-        <p className="text-gray-400 text-sm mt-2">Stay updated with the latest news, updates and promotions</p>
-      </div>
+          <h1 className="text-white font-bold text-xl sm:text-2xl">News & Announcements</h1>
+          <p className="text-gray-400 text-sm mt-2">Stay updated with the latest news, updates and promotions</p>
+        </div>
 
         {/* News Content */}
         <div className="px-4 md:px-6 lg:px-8 pb-24">
-        {sortedNews.length === 0 ? (
-          <div className="text-center py-16">
-            <div className="text-white text-lg mb-2">No news available</div>
-            <div className="text-gray-400 text-sm">Check back later for updates</div>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {sortedNews.map((item) => (
-              <div
-                key={item._id}
-                className="p-4 rounded-lg cursor-pointer transition-opacity hover:opacity-90"
-                style={{ 
-                  background: 'linear-gradient(90deg, rgb(127, 140, 170) 0%, rgb(92, 102, 124) 100%)',
-                  boxShadow: '0px 4px 4px 0px #00000040'
-                }}
-                onClick={() => toggleExpand(item._id)}
-              >
-                <div className="flex items-start gap-4">
-                  {/* Icon */}
-                  <div className="w-12 h-12 rounded-full bg-gray-300 shrink-0 flex items-center justify-center">
-                    {item.isPinned ? (
-                      <svg className="w-8 h-8 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M10 2L3 9v9a1 1 0 001 1h12a1 1 0 001-1V9l-7-7z" />
-                      </svg>
-                    ) : (
-                      <svg className="w-8 h-8 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                      </svg>
-                    )}
-                  </div>
-                  
-                  {/* Details */}
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="font-bold text-base mb-1 text-white capitalize">{item.category}</span>
-                      {item.isPinned && (
-                        <span className="text-xs text-gray-300">• Pinned</span>
+          {sortedNews.length === 0 ? (
+            <div className="text-center py-16">
+              <div className="text-white text-lg mb-2">No news available</div>
+              <div className="text-gray-400 text-sm">Check back later for updates</div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {sortedNews.map((item) => (
+                <div
+                  key={item._id}
+                  className="p-4 rounded-lg cursor-pointer transition-opacity hover:opacity-90"
+                  style={{
+                    background: 'linear-gradient(90deg, rgb(127, 140, 170) 0%, rgb(92, 102, 124) 100%)',
+                    boxShadow: '0px 4px 4px 0px #00000040'
+                  }}
+                  onClick={() => toggleExpand(item._id)}
+                >
+                  <div className="flex items-start gap-4">
+                    {/* Icon */}
+                    <div className="w-12 h-12 rounded-full bg-gray-300 shrink-0 flex items-center justify-center">
+                      {item.isPinned ? (
+                        <svg className="w-8 h-8 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M10 2L3 9v9a1 1 0 001 1h12a1 1 0 001-1V9l-7-7z" />
+                        </svg>
+                      ) : (
+                        <svg className="w-8 h-8 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                        </svg>
                       )}
                     </div>
-                    <div className="text-white text-sm mb-1">{item.title}</div>
-                    <div className="text-gray-300 text-xs">{formatDate(item.createdAt)}</div>
-                    
-                    {/* Expanded Description */}
-                    {expandedItems.has(item._id) && (
-                      <div className="mt-3 pt-3 border-t border-white border-opacity-20">
-                        {item.contentType === 'html' ? (
-                          <div 
-                            className="text-white text-sm leading-relaxed" 
-                            style={{ fontFamily: 'Poppins' }}
-                            dangerouslySetInnerHTML={{ __html: item.content }}
-                          />
-                        ) : (
-                          <p className="text-white text-sm leading-relaxed" style={{ fontFamily: 'Poppins' }}>
-                            {item.content}
-                          </p>
+
+                    {/* Details */}
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="font-bold text-base mb-1 text-white capitalize">{item.category}</span>
+                        {item.isPinned && (
+                          <span className="text-xs text-gray-300">• Pinned</span>
                         )}
                       </div>
-                    )}
+                      <div className="text-white text-sm mb-1">{item.title}</div>
+                      <div className="text-gray-300 text-xs">{formatDate(item.createdAt)}</div>
+
+                      {/* Expanded Description */}
+                      {expandedItems.has(item._id) && (
+                        <div className="mt-3 pt-3 border-t border-white border-opacity-20">
+                          {item.contentType === 'html' ? (
+                            <div
+                              className="text-white text-sm leading-relaxed"
+                              style={{ fontFamily: 'Poppins' }}
+                              dangerouslySetInnerHTML={{ __html: item.content }}
+                            />
+                          ) : (
+                            <p className="text-white text-sm leading-relaxed" style={{ fontFamily: 'Poppins' }}>
+                              {item.content}
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* Bottom Spacing for Fixed Navigation */}
         <div className="h-15"></div>

@@ -9,9 +9,9 @@ interface PublicRouteProps {
   redirectTo?: string;
 }
 
-export default function PublicRoute({ 
-  children, 
-  redirectTo = '/dashboard' 
+export default function PublicRoute({
+  children,
+  redirectTo = '/'
 }: PublicRouteProps) {
   const { isAuthenticated, isLoading, token } = useAppSelector((state) => state.auth);
   const router = useRouter();

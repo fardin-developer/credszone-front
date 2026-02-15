@@ -27,6 +27,12 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/uploads/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'api.topupmania.com',
+        port: '',
+        pathname: '/uploads/**',
+      },
     ],
   },
 };

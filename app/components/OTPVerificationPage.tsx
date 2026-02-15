@@ -14,7 +14,7 @@ interface OTPVerificationPageProps {
 
 export default function OTPVerificationPage({ onNavigate }: OTPVerificationPageProps) {
   const [otp, setOtp] = useState(['', '', '', '', '', '']); // 6-digit OTP
-  const [loginData, setLoginData] = useState<{email: string, isPhoneLogin: boolean} | null>(null);
+  const [loginData, setLoginData] = useState<{ email: string, isPhoneLogin: boolean } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
   const router = useRouter();
@@ -23,7 +23,7 @@ export default function OTPVerificationPage({ onNavigate }: OTPVerificationPageP
   useEffect(() => {
     // Reset loading state on mount
     setIsLoading(false);
-    
+
     // Get login data from localStorage
     const storedData = localStorage.getItem('loginData');
     if (storedData) {
@@ -75,7 +75,7 @@ export default function OTPVerificationPage({ onNavigate }: OTPVerificationPageP
 
   const handleOtpChange = (index: number, value: string) => {
     if (value.length > 1) return; // Only allow single digit
-    
+
     const newOtp = [...otp];
     newOtp[index] = value;
     setOtp(newOtp);
@@ -114,56 +114,56 @@ export default function OTPVerificationPage({ onNavigate }: OTPVerificationPageP
 
       const response = await apiClient.post('/user/verify-otp', requestBody);
       const responseData = response.data;
-        
-        if (responseData.requiresRegistration) {
-          // Don't store phone number - pass it via Redux or URL params if needed
-          // Clear login data from localStorage
-          localStorage.removeItem('loginData');
-          // Navigate to registration page
-          setTimeout(() => {
-            if (onNavigate) {
-              onNavigate('register');
-            } else {
-              router.push('/register');
-            }
-          }, 1500);
-        } else {
-          // Handle existing user login response
-          // Dispatch login success action
-          dispatch(loginSuccess({
-            user: responseData.user,
-            token: responseData.token
-          }));
-          
-          // Store only token in localStorage for persistence
-          if (responseData.token) {
-            localStorage.setItem('authToken', responseData.token);
+
+      if (responseData.requiresRegistration) {
+        // Don't store phone number - pass it via Redux or URL params if needed
+        // Clear login data from localStorage
+        localStorage.removeItem('loginData');
+        // Navigate to registration page
+        setTimeout(() => {
+          if (onNavigate) {
+            onNavigate('register');
+          } else {
+            router.push('/register');
           }
-          
-          // Clear login data from localStorage
-          localStorage.removeItem('loginData');
-          
-          // Navigate to intended path or dashboard after a short delay
-          setTimeout(() => {
-            try {
-              const intended = localStorage.getItem('intendedPath');
-              if (intended) {
-                localStorage.removeItem('intendedPath');
-                if (onNavigate) {
-                  onNavigate('home');
-                } else {
-                  router.push(intended);
-                  return;
-                }
-              }
-            } catch {}
-            if (onNavigate) {
-              onNavigate('home');
-            } else {
-              router.push('/dashboard');
-            }
-          }, 1500);
+        }, 1500);
+      } else {
+        // Handle existing user login response
+        // Dispatch login success action
+        dispatch(loginSuccess({
+          user: responseData.user,
+          token: responseData.token
+        }));
+
+        // Store only token in localStorage for persistence
+        if (responseData.token) {
+          localStorage.setItem('authToken', responseData.token);
         }
+
+        // Clear login data from localStorage
+        localStorage.removeItem('loginData');
+
+        // Navigate to intended path or dashboard after a short delay
+        setTimeout(() => {
+          try {
+            const intended = localStorage.getItem('intendedPath');
+            if (intended) {
+              localStorage.removeItem('intendedPath');
+              if (onNavigate) {
+                onNavigate('home');
+              } else {
+                router.push(intended);
+                return;
+              }
+            }
+          } catch { }
+          if (onNavigate) {
+            onNavigate('home');
+          } else {
+            router.push('/');
+          }
+        }, 1500);
+      }
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || error.message || 'Invalid OTP. Please try again.';
       dispatch(loginFailure(errorMessage));
@@ -260,15 +260,15 @@ export default function OTPVerificationPage({ onNavigate }: OTPVerificationPageP
 
       {/* Proceed Button */}
       <div className="w-full max-w-sm px-2 sm:px-0 mb-6 sm:mb-8">
-        <button 
+        <button
           type="button"
           onClick={handleProceed}
           disabled={isLoading}
           aria-busy={isLoading}
           className="w-full text-white font-bold text-base sm:text-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          style={{ 
+          style={{
             height: '52px',
-            backgroundColor: 'rgb(127, 140, 170)', 
+            backgroundColor: 'rgb(127, 140, 170)',
             borderRadius: '25px',
             border: '1px solid transparent',
             opacity: 1
@@ -280,7 +280,7 @@ export default function OTPVerificationPage({ onNavigate }: OTPVerificationPageP
 
       {/* Resend OTP */}
       <div className="text-center mb-4">
-        <button 
+        <button
           type="button"
           onClick={() => onNavigate ? onNavigate('login') : router.push('/login')}
           className="hover:text-white transition-colors"
@@ -295,7 +295,7 @@ export default function OTPVerificationPage({ onNavigate }: OTPVerificationPageP
         <p className="text-white mb-2 text-sm sm:text-base">
           {loginData?.isPhoneLogin ? "don't have access to your phone?" : "don't have access to your email?"}
         </p>
-        <button 
+        <button
           type="button"
           onClick={() => onNavigate ? onNavigate('login') : router.push('/login')}
           className="hover:text-white transition-colors"

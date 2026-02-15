@@ -24,7 +24,7 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
   useEffect(() => {
     // Reset local loading state immediately
     setIsLoading(false);
-    
+
     // Reset Redux loading state to prevent PublicRoute from showing loading spinner
     // This ensures that when user navigates back from OTP page, login page is not stuck on loading
     dispatch(loginFailure(''));
@@ -35,7 +35,7 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
   useEffect(() => {
     // Push a state to the history stack to prevent going back outside
     window.history.pushState(null, '', window.location.href);
-    
+
     const handlePopState = () => {
       // Push another state to prevent going back
       window.history.pushState(null, '', window.location.href);
@@ -43,7 +43,7 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
       if (onNavigate) {
         onNavigate('home');
       } else {
-        router.push('/dashboard');
+        router.push('/');
       }
     };
 
@@ -67,7 +67,7 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
     dispatch(loginStart());
 
     try {
-      const requestBody = loginMethod === 'phone' 
+      const requestBody = loginMethod === 'phone'
         ? { phone: phone }
         : { email: email };
 
@@ -80,14 +80,14 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
           email: loginValue,
           isPhoneLogin: loginMethod === 'phone'
         }));
-        
+
         // Store separately for easy retrieval
         if (loginMethod === 'phone') {
           localStorage.setItem('loginPhone', phone);
         } else {
           localStorage.setItem('loginEmail', email);
         }
-        
+
         // Navigate immediately
         if (onNavigate) {
           onNavigate('otp-verification');
@@ -115,7 +115,7 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
               if (onNavigate) {
                 onNavigate('home');
               } else {
-                router.push('/dashboard');
+                router.push('/');
               }
             }}
             className="flex items-center cursor-pointer"
@@ -177,22 +177,20 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
                 <button
                   type="button"
                   onClick={() => setLoginMethod('phone')}
-                  className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${
-                    loginMethod === 'phone'
+                  className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${loginMethod === 'phone'
                       ? 'bg-white text-gray-800'
                       : 'bg-gray-300 text-gray-600'
-                  }`}
+                    }`}
                 >
                   Phone
                 </button>
                 <button
                   type="button"
                   onClick={() => setLoginMethod('email')}
-                  className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${
-                    loginMethod === 'email'
+                  className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${loginMethod === 'email'
                       ? 'bg-white text-gray-800'
                       : 'bg-gray-300 text-gray-600'
-                  }`}
+                    }`}
                 >
                   Email
                 </button>
