@@ -175,8 +175,8 @@ export default function LeaderboardPage({ onNavigate }: LeaderboardPageProps = {
             <button
               onClick={() => setActiveTab('current')}
               className={`pb-3 px-4 font-semibold transition-all ${activeTab === 'current'
-                  ? 'text-white border-b-2 border-blue-500'
-                  : 'text-gray-400 hover:text-gray-300'
+                ? 'text-white border-b-2 border-blue-500'
+                : 'text-gray-400 hover:text-gray-300'
                 }`}
             >
               {currentPeriod?.period || 'Current Period'}
@@ -184,8 +184,8 @@ export default function LeaderboardPage({ onNavigate }: LeaderboardPageProps = {
             <button
               onClick={() => setActiveTab('last')}
               className={`pb-3 px-4 font-semibold transition-all ${activeTab === 'last'
-                  ? 'text-white border-b-2 border-blue-500'
-                  : 'text-gray-400 hover:text-gray-300'
+                ? 'text-white border-b-2 border-blue-500'
+                : 'text-gray-400 hover:text-gray-300'
                 }`}
             >
               {lastPeriod?.period || 'Last Period'}
@@ -200,9 +200,9 @@ export default function LeaderboardPage({ onNavigate }: LeaderboardPageProps = {
             <div className="flex flex-col items-center">
               <div className="text-gray-300 font-bold mb-3 text-lg sm:text-xl tracking-wide">🥈 #2</div>
               <div className="relative">
-                {getAvatarOrPlaceholder(topThreePlayers[0]?.avatar, topThreePlayers[0]?.name || 'Player', '#E8E8E8')}
+                {getAvatarOrPlaceholder(topThreePlayers[1]?.avatar, topThreePlayers[1]?.name || 'Player', '#E8E8E8')}
                 <div className="text-white mt-4 text-center font-semibold text-sm sm:text-base truncate max-w-24">
-                  {topThreePlayers[0]?.name || '—'}
+                  {topThreePlayers[1]?.name || '—'}
                 </div>
                 <div
                   className="mt-3 px-4 py-1.5 rounded-full text-white text-xs sm:text-sm font-bold"
@@ -213,7 +213,7 @@ export default function LeaderboardPage({ onNavigate }: LeaderboardPageProps = {
                     textAlign: 'center'
                   }}
                 >
-                  ₹{topThreePlayers[0]?.totalPurchaseAmount?.toLocaleString() || '0'}
+                  ₹{topThreePlayers[1]?.totalPurchaseAmount?.toLocaleString() || '0'}
                 </div>
                 <div
                   className="mx-auto mt-3"
@@ -238,9 +238,9 @@ export default function LeaderboardPage({ onNavigate }: LeaderboardPageProps = {
                     zIndex: -1,
                   }}
                 ></div>
-                {getAvatarOrPlaceholder(topThreePlayers[1]?.avatar, topThreePlayers[1]?.name || 'Player', '#FFD700')}
+                {getAvatarOrPlaceholder(topThreePlayers[0]?.avatar, topThreePlayers[0]?.name || 'Player', '#FFD700')}
                 <div className="text-white mt-4 text-center font-bold text-sm sm:text-base truncate max-w-24">
-                  {topThreePlayers[1]?.name || '—'}
+                  {topThreePlayers[0]?.name || '—'}
                 </div>
                 <div
                   className="mt-3 px-4 py-1.5 rounded-full text-white text-xs sm:text-sm font-bold"
@@ -251,7 +251,7 @@ export default function LeaderboardPage({ onNavigate }: LeaderboardPageProps = {
                     textAlign: 'center'
                   }}
                 >
-                  ₹{topThreePlayers[1]?.totalPurchaseAmount?.toLocaleString() || '0'}
+                  ₹{topThreePlayers[0]?.totalPurchaseAmount?.toLocaleString() || '0'}
                 </div>
                 <div
                   className="mx-auto mt-3"

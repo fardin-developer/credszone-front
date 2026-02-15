@@ -152,7 +152,7 @@ export default function Navbar({ onMenuToggle, onNavigate, walletBalance }: Navb
                             </div>
                         ) : (
                             <button
-                                onClick={() => router.push('https://credszone.com/login')}
+                                onClick={() => router.push('/login')}
                                 className="w-9 h-9 rounded-full bg-[#7F8CAA] flex items-center justify-center hover:bg-[#6a7a99] transition-colors shadow-md"
                                 aria-label="Login"
                             >

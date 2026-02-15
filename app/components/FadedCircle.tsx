@@ -3,12 +3,13 @@ interface FadedCircleProps {
   left?: string;
   bottom?: string;
   right?: string;
+  className?: string;
 }
 
-export default function FadedCircle({ top = '812px', left = '-11px', bottom, right }: FadedCircleProps) {
+export default function FadedCircle({ top = '812px', left = '-11px', bottom, right, className }: FadedCircleProps) {
   return (
-    <div 
-      className="absolute"
+    <div
+      className={`absolute ${className || ''}`}
       style={{
         // Make the circle responsive while capping at original size
         width: 'min(469px, 80vw)',

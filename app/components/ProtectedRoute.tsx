@@ -2,7 +2,7 @@
 
 import { useAppSelector } from '@/lib/hooks/redux';
 import { useRouter, usePathname } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import AuthChecker from './AuthChecker';
 
 interface ProtectedRouteProps {
@@ -10,31 +10,35 @@ interface ProtectedRouteProps {
   redirectTo?: string;
 }
 
-export default function ProtectedRoute({ 
-  children, 
-  redirectTo = '/login' 
+export default function ProtectedRoute({
+  children,
+  redirectTo = '/login'
 }: ProtectedRouteProps) {
   const { isAuthenticated, isLoading, token } = useAppSelector((state) => state.auth);
   const router = useRouter();
   const pathname = usePathname();
+  const [hasMounted, setHasMounted] = useState(false);
+
+  // Handle client-side mounting
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
   useEffect(() => {
+    // Only run redirect logic on client after mounting
+    if (!hasMounted) return;
+
     // Only redirect if we're not loading and definitely not authenticated
     if (!isLoading && !isAuthenticated) {
-      // Check if we have a token in localStorage as fallback (client-side only)
-      if (typeof window !== 'undefined') {
-        const localToken = localStorage.getItem('authToken');
-        if (!localToken) {
-          try {
-            localStorage.setItem('intendedPath', pathname || '/');
-          } catch {}
-          router.push(redirectTo);
-        }
-      } else {
+      const localToken = localStorage.getItem('authToken');
+      if (!localToken) {
+        try {
+          localStorage.setItem('intendedPath', pathname || '/');
+        } catch { }
         router.push(redirectTo);
       }
     }
-  }, [isAuthenticated, isLoading, router, redirectTo, pathname]);
+  }, [isAuthenticated, isLoading, router, redirectTo, pathname, hasMounted]);
 
   // Show loading spinner while checking authentication
   if (isLoading) {
@@ -53,14 +57,17 @@ export default function ProtectedRoute({
     return <AuthChecker>{children}</AuthChecker>;
   }
 
-  // Check localStorage token as fallback (client-side only)
-  if (!isAuthenticated && !token) {
-    if (typeof window !== 'undefined') {
-      const localToken = localStorage.getItem('authToken');
-      if (localToken) {
-        return <AuthChecker>{children}</AuthChecker>;
-      }
+  // Check localStorage token as fallback (client-side only) - only after mounting
+  if (!isAuthenticated && !token && hasMounted) {
+    const localToken = localStorage.getItem('authToken');
+    if (localToken) {
+      return <AuthChecker>{children}</AuthChecker>;
     }
+    return null;
+  }
+
+  // During SSR or before client mount, don't render anything for unauthenticated users
+  if (!isAuthenticated && !token && !hasMounted) {
     return null;
   }
 

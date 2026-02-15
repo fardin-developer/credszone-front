@@ -146,7 +146,7 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps = {}) {
     </div>
   );
 
-  return token && !isAuthenticated ? <AuthChecker>{dashboardContent}</AuthChecker> : dashboardContent;
+  return <AuthChecker>{dashboardContent}</AuthChecker>;
 }
 
 function ActionIconButton({ icon, label, onClick }: { icon: any, label: string, onClick: () => void }) {

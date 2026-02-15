@@ -18,8 +18,9 @@ export default function AuthChecker({ children }: AuthCheckerProps) {
       // Check if we have a token in Redux state or localStorage
       const authToken = token || (typeof window !== 'undefined' ? localStorage.getItem('authToken') : null);
 
-      // Only check auth if we have a token but haven't verified it yet
-      if (authToken && !isAuthenticated) {
+      // Fetch user data whenever we have a token
+      // This runs on: page load, after login (when isAuthenticated changes), or when token changes
+      if (authToken) {
         // Don't dispatch checkAuthStart to avoid setting isLoading to true
         // This allows the page to render immediately while auth check runs in background
 

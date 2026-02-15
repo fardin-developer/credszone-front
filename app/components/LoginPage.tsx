@@ -20,26 +20,19 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
   const router = useRouter();
   const dispatch = useAppDispatch();
 
-  // Reset loading state immediately when component mounts (in case user navigates back from OTP page)
+  // Reset loading state immediately when component mounts
   useEffect(() => {
-    // Reset local loading state immediately
     setIsLoading(false);
-
-    // Reset Redux loading state to prevent PublicRoute from showing loading spinner
-    // This ensures that when user navigates back from OTP page, login page is not stuck on loading
     dispatch(loginFailure(''));
     dispatch(clearError());
   }, [dispatch]);
 
   // Handle browser back button - prevent navigation outside app
   useEffect(() => {
-    // Push a state to the history stack to prevent going back outside
     window.history.pushState(null, '', window.location.href);
 
     const handlePopState = () => {
-      // Push another state to prevent going back
       window.history.pushState(null, '', window.location.href);
-      // Navigate to dashboard instead of going back outside
       if (onNavigate) {
         onNavigate('home');
       } else {
@@ -47,48 +40,39 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
       }
     };
 
-    // Listen for popstate event (browser back button)
     window.addEventListener('popstate', handlePopState);
-
     return () => {
       window.removeEventListener('popstate', handlePopState);
     };
   }, [router, onNavigate]);
 
+  const [loginError, setLoginError] = useState('');
+
   const handleLogin = async () => {
-    if (loginMethod === 'phone' && !phone.trim()) {
-      return;
-    }
-    if (loginMethod === 'email' && !email.trim()) {
-      return;
-    }
+    if (loginMethod === 'phone' && !phone.trim()) return;
+    if (loginMethod === 'email' && !email.trim()) return;
 
     setIsLoading(true);
+    setLoginError('');
     dispatch(loginStart());
 
     try {
-      const requestBody = loginMethod === 'phone'
-        ? { phone: phone }
-        : { email: email };
-
+      const requestBody = loginMethod === 'phone' ? { phone } : { email };
       const response = await apiClient.post('/user/send-otp', requestBody);
 
       if (response.data) {
-        // Store the login data for OTP verification page
         const loginValue = loginMethod === 'phone' ? phone : email;
         localStorage.setItem('loginData', JSON.stringify({
           email: loginValue,
           isPhoneLogin: loginMethod === 'phone'
         }));
 
-        // Store separately for easy retrieval
         if (loginMethod === 'phone') {
           localStorage.setItem('loginPhone', phone);
         } else {
           localStorage.setItem('loginEmail', email);
         }
 
-        // Navigate immediately
         if (onNavigate) {
           onNavigate('otp-verification');
         } else {
@@ -96,169 +80,156 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
         }
       }
     } catch (error: any) {
-      // Error handling without toast
-      dispatch(loginFailure(error?.response?.data?.message || 'Failed to send OTP'));
+      let msg = 'Failed to send OTP';
+      if (error?.response?.data?.message) {
+        msg = error.response.data.message;
+      } else if (typeof error?.response?.data === 'string') {
+        try {
+          const parsed = JSON.parse(error.response.data);
+          if (parsed.message) msg = parsed.message;
+          else msg = error.response.data;
+        } catch {
+          msg = error.response.data;
+        }
+      } else if (error?.message) {
+        msg = error.message;
+      }
+      setLoginError(msg);
+      dispatch(loginFailure(msg));
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center pt-4 sm:pt-6 px-4 relative overflow-hidden" style={{ backgroundColor: '#232426' }}>
-      {/* Desktop Container */}
-      <div className="w-full max-w-md lg:max-w-lg mx-auto">
+    <div className="min-h-screen w-full flex items-center justify-center bg-[#232426] relative overflow-hidden font-poppins">
+
+      {/* Background Enhancements */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <FadedCircle top="-10%" left="-10%" className="opacity-20 transform scale-150" />
+        <FadedCircle top="90%" right="-10%" className="opacity-20 transform scale-150" />
+      </div>
+
+      <div className="relative z-10 w-full max-w-md px-6">
         {/* Back Button */}
-        <div className="w-full mb-3">
-          <button
-            type="button"
-            onClick={() => {
-              if (onNavigate) {
-                onNavigate('home');
-              } else {
-                router.push('/');
-              }
-            }}
-            className="flex items-center cursor-pointer"
-            style={{
-              color: '#7F8CAA',
-              fontFamily: 'Poppins',
-              fontWeight: 700,
-              fontStyle: 'normal',
-              fontSize: '16px',
-              lineHeight: '100%',
-              letterSpacing: '0%'
-            }}
-          >
-            <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
-            </svg>
-            go back
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={() => onNavigate ? onNavigate('home') : router.push('/')}
+          className="absolute -top-16 left-6 flex items-center text-[#7F8CAA] hover:text-white transition-colors duration-300 font-bold text-sm"
+        >
+          <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          Back
+        </button>
 
-        {/* Logo */}
-        <div className="flex justify-center mb-4 sm:mb-6">
-          <div className="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 flex items-center justify-center">
-            <Image
-              src="/logo.png"
-              alt="Creds Zone Logo"
-              width={192}
-              height={192}
-              className="w-full h-full object-contain"
-            />
+        {/* Main Card */}
+        <div className="bg-[#2A2B2E] border border-[#3A3B40] rounded-3xl shadow-2xl p-8 backdrop-blur-sm">
+
+          {/* Header Section */}
+          <div className="text-center mb-8">
+            <div className="inline-flex justify-center items-center w-20 h-20 mb-4 bg-[#232426] rounded-2xl shadow-inner border border-[#3A3B40]">
+              <Image
+                src="/logo.png"
+                alt="Creds Zone"
+                width={50}
+                height={50}
+                className="object-contain"
+                priority
+              />
+            </div>
+            <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">
+              Welcome Back
+            </h1>
+            <p className="text-[#7F8CAA] text-sm font-medium">
+              Sign in to continue to <span className="text-white">Creds Zone</span>
+            </p>
           </div>
-        </div>
 
-        {/* Title */}
-        <div className="text-center mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">
-            <span className="text-white">Creds</span>
-            <span className="ml-2" style={{ color: '#7F8CAA' }}>Zone</span>
-          </h1>
-          <p className="text-white text-xs sm:text-sm">your best top-up destination</p>
-        </div>
+          {/* Toggle Switch */}
+          <div className="flex p-1 mb-8 bg-[#232426] rounded-xl border border-[#3A3B40]">
+            {(['phone', 'email'] as const).map((method) => (
+              <button
+                key={method}
+                type="button"
+                onClick={() => {
+                  setLoginMethod(method);
+                  setLoginError('');
+                }}
+                className={`flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all duration-300 capitalize ${loginMethod === method
+                    ? 'bg-[#7F8CAA] text-white shadow-lg'
+                    : 'text-[#7F8CAA] hover:text-[#9BA6C0]'
+                  }`}
+              >
+                {method}
+              </button>
+            ))}
+          </div>
 
-        {/* Login Form */}
-        <div className="w-full relative">
-          {/* Form Container */}
-          <div className="rounded-2xl p-6 pt-12 shadow-lg relative border-2 border-white" style={{ backgroundColor: '#7F8CAA' }}>
-            {/* User Icon */}
-            <div className="absolute -top-8 left-1/2 transform -translate-x-1/2">
-              <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gray-200 rounded-full flex items-center justify-center">
-                <svg className="w-7 h-7 sm:w-8 sm:h-8 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                </svg>
-              </div>
-            </div>
+          {/* Form Content */}
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <label
+                htmlFor="login-input"
+                className="block text-xs uppercase tracking-wider text-[#7F8CAA] font-bold ml-1"
+              >
+                {loginMethod === 'phone' ? 'Phone Number' : 'Email Address'}
+              </label>
 
-            {/* Login Method Toggle */}
-            <div className="mt-8 mb-4">
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setLoginMethod('phone')}
-                  className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${loginMethod === 'phone'
-                      ? 'bg-white text-gray-800'
-                      : 'bg-gray-300 text-gray-600'
-                    }`}
-                >
-                  Phone
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setLoginMethod('email')}
-                  className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${loginMethod === 'email'
-                      ? 'bg-white text-gray-800'
-                      : 'bg-gray-300 text-gray-600'
-                    }`}
-                >
-                  Email
-                </button>
-              </div>
-            </div>
-
-            {/* Phone/Email Input */}
-            <div>
-              {loginMethod === 'phone' ? (
-                <>
-                  <div className="flex items-center mb-3">
-                    <svg className="w-5 h-5 text-white mr-2" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#7F8CAA] group-focus-within:text-white transition-colors duration-300">
+                  {loginMethod === 'phone' ? (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                     </svg>
-                    <span className="text-white font-medium">Phone</span>
-                  </div>
-                  <label htmlFor="login-field" className="sr-only">Phone number</label>
-                  <input
-                    type="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="enter your phone number"
-                    id="login-field"
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-gray-700 placeholder-white focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent"
-                    style={{ backgroundColor: '#C3BFBF' }}
-                  />
+                  ) : (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+                    </svg>
+                  )}
+                </div>
+                <input
+                  id="login-input"
+                  type={loginMethod === 'phone' ? 'tel' : 'email'}
+                  value={loginMethod === 'phone' ? phone : email}
+                  onChange={(e) => loginMethod === 'phone' ? setPhone(e.target.value) : setEmail(e.target.value)}
+                  placeholder={loginMethod === 'phone' ? 'Enter phone number' : 'Enter email address'}
+                  className="w-full pl-12 pr-4 py-3.5 bg-[#232426] border border-[#3A3B40] rounded-xl text-white placeholder-[#5A6375] focus:outline-none focus:border-[#7F8CAA] focus:ring-1 focus:ring-[#7F8CAA] transition-all duration-300"
+                />
+              </div>
+            </div>
+
+            {loginError && (
+              <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 text-sm font-medium text-center animate-shake">
+                {loginError}
+              </div>
+            )}
+
+            <button
+              type="button"
+              onClick={handleLogin}
+              disabled={isLoading}
+              className="w-full py-3.5 bg-[#7F8CAA] hover:bg-[#6A7690] text-white font-bold rounded-xl shadow-lg hover:shadow-[#7F8CAA]/30 transition-all duration-300 transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2"
+            >
+              {isLoading ? (
+                <>
+                  <svg className="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  <span>Sending Code...</span>
                 </>
               ) : (
-                <>
-                  <div className="flex items-center mb-3">
-                    <svg className="w-5 h-5 text-white mr-2" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-                      <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-                    </svg>
-                    <span className="text-white font-medium">Email</span>
-                  </div>
-                  <label htmlFor="login-field" className="sr-only">Email address</label>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="enter your email"
-                    id="login-field"
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-gray-700 placeholder-white focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent"
-                    style={{ backgroundColor: '#C3BFBF' }}
-                  />
-                </>
+                <span>Continue</span>
               )}
-            </div>
+            </button>
           </div>
         </div>
 
-        {/* Login Button */}
-        <div className="mt-6 sm:mt-8 w-full">
-          <button
-            type="button"
-            onClick={handleLogin}
-            disabled={isLoading}
-            aria-busy={isLoading}
-            className="w-full border-2 border-white py-3 sm:py-4 text-white font-bold text-base sm:text-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{ backgroundColor: '#7F8CAA', borderRadius: '25px' }}
-          >
-            {isLoading ? 'SENDING OTP...' : 'LOGIN NOW'}
-          </button>
-        </div>
-
-        {/* Faded Circle */}
-        <FadedCircle top="1000px" />
+        {/* Footer Text */}
+        <p className="text-center mt-8 text-[#5A6375] text-xs">
+          By continuing, you agree to our Terms of Service and Privacy Policy.
+        </p>
       </div>
     </div>
   );

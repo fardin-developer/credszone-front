@@ -1,11 +1,32 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useAppSelector } from '@/lib/hooks/redux';
 import apiClient from '@/lib/api/axios';
 import BottomNavigation from './BottomNavigation';
 import TopSection from './TopSection';
+import {
+  FaNewspaper,
+  FaFilter,
+  FaTimes,
+  FaCalendarAlt,
+  FaUser,
+  FaTag,
+  FaFire,
+  FaBullhorn,
+  FaInfoCircle,
+  FaWrench,
+  FaStar
+} from 'react-icons/fa';
+
+// --- Interfaces ---
+
+interface Author {
+  _id: string;
+  name: string;
+  email: string;
+}
 
 interface NewsItem {
   _id: string;
@@ -13,19 +34,15 @@ interface NewsItem {
   content: string;
   summary: string;
   image?: string;
-  category: string;
-  priority: string;
+  category: 'general' | 'announcement' | 'update' | 'maintenance' | 'promotion';
+  priority: 'low' | 'medium' | 'high' | 'urgent';
   status: string;
   tags: string[];
-  author: {
-    _id: string;
-    name: string;
-    email: string;
-  };
+  author: Author;
   expiresAt: string;
   isPinned: boolean;
   viewCount: number;
-  contentType: string;
+  contentType: 'html' | 'text';
   createdAt: string;
   updatedAt: string;
   publishedAt: string;
@@ -44,6 +61,17 @@ interface NewsResponse {
       hasPrevPage: boolean;
       limit: number;
     };
+    filters?: {
+      search: string;
+    };
+    stats?: {
+      totalNews: number;
+      publishedNews: number;
+      draftNews: number;
+      archivedNews: number;
+      pinnedNews: number;
+      urgentNews: number;
+    }
   };
 }
 
@@ -51,241 +79,352 @@ interface NewsPageProps {
   onNavigate?: (screen: string) => void;
 }
 
+// --- Icons & Helpers ---
+
+const getCategoryIcon = (category: string) => {
+  switch (category) {
+    case 'announcement': return <FaBullhorn className="text-blue-400" />;
+    case 'update': return <FaInfoCircle className="text-green-400" />;
+    case 'maintenance': return <FaWrench className="text-orange-400" />;
+    case 'promotion': return <FaStar className="text-purple-400" />;
+    default: return <FaNewspaper className="text-gray-400" />;
+  }
+};
+
+const getPriorityColor = (priority: string) => {
+  switch (priority) {
+    case 'urgent': return 'bg-red-500/20 text-red-400 border-red-500/30';
+    case 'high': return 'bg-orange-500/20 text-orange-400 border-orange-500/30';
+    case 'medium': return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
+    default: return 'bg-blue-500/10 text-blue-400 border-blue-500/20';
+  }
+};
+
+const getCategoryColor = (category: string) => {
+  switch (category) {
+    case 'announcement': return 'bg-blue-500/20 text-gray-800 border-blue-500/30';
+    case 'update': return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30';
+    case 'maintenance': return 'bg-amber-500/20 text-amber-400 border-amber-500/30';
+    case 'promotion': return 'bg-purple-500/20 text-purple-400 border-purple-500/30';
+    default: return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
+  }
+};
+
+// --- Components ---
+
 export default function NewsPage({ onNavigate }: NewsPageProps = {}) {
   const router = useRouter();
-  const { isAuthenticated, token } = useAppSelector((state) => state.auth);
   const [newsData, setNewsData] = useState<NewsItem[]>([]);
-  const [isLoading, setIsLoading] = useState(!isAuthenticated);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
+
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedPriority, setSelectedPriority] = useState<string>('all');
+  const [selectedNews, setSelectedNews] = useState<NewsItem | null>(null);
 
   useEffect(() => {
-    if (isAuthenticated && (token || typeof window === 'undefined' || localStorage.getItem('authToken'))) {
-      fetchNews();
-    }
-  }, [isAuthenticated, token]);
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      setIsLoading(false);
-    }
-  }, [isAuthenticated]);
+    fetchNews();
+  }, []);
 
   const fetchNews = async () => {
     try {
-      if (!token) {
-        setError('Authentication token not found');
-        return;
-      }
-
-      const response = await apiClient.get('/news/list?page=1&limit=20');
+      setIsLoading(true);
+      const response = await apiClient.get('/news/list?page=1&limit=50');
       const data: NewsResponse = response.data;
       if (data.success && data.data && data.data.news) {
         setNewsData(data.data.news);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching news:', error);
       setError('Failed to load news');
-      // Use demo data on error
-      setNewsData(demoNewsData);
     } finally {
       setIsLoading(false);
     }
   };
 
+  const filteredNews = useMemo(() => {
+    return newsData.filter(item => {
+      const categoryMatch = selectedCategory === 'all' || item.category.toLowerCase() === selectedCategory.toLowerCase();
+      const priorityMatch = selectedPriority === 'all' || item.priority.toLowerCase() === selectedPriority.toLowerCase();
+      return categoryMatch && priorityMatch;
+    }).sort((a, b) => {
+      if (a.isPinned && !b.isPinned) return -1;
+      if (!a.isPinned && b.isPinned) return 1;
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+  }, [newsData, selectedCategory, selectedPriority]);
+
+  const categories = ['All', 'General', 'Announcement', 'Update', 'Maintenance', 'Promotion'];
+  const priorities = ['All', 'Low', 'Medium', 'High', 'Urgent'];
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const year = date.getFullYear();
-    const hours = date.getHours();
-    const minutes = date.getMinutes().toString().padStart(2, '0');
-    const ampm = hours >= 12 ? 'pm' : 'am';
-    const displayHours = hours % 12 || 12;
-
-    return `${day}/${month}/${year}, ${displayHours}:${minutes} ${ampm}`;
+    return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }).format(date);
   };
-
-  const toggleExpand = (id: string) => {
-    const newExpanded = new Set(expandedItems);
-    if (newExpanded.has(id)) {
-      newExpanded.delete(id);
-    } else {
-      newExpanded.add(id);
-    }
-    setExpandedItems(newExpanded);
-  };
-
-  // Demo news data as fallback
-  const demoNewsData: NewsItem[] = [
-    {
-      _id: '1',
-      title: 'If you face issues after our new UI update',
-      content: '<p>We have released a new UI update with improved features. If you encounter any issues, please contact our support team.</p>',
-      summary: 'We have released a new UI update with improved features. If you encounter any issues, please contact our support team.',
-      category: 'update',
-      priority: 'normal',
-      status: 'published',
-      tags: [],
-      author: {
-        _id: '1',
-        name: 'Admin',
-        email: 'admin@example.com'
-      },
-      expiresAt: '2027-12-31T00:00:00.000Z',
-      isPinned: true,
-      viewCount: 0,
-      contentType: 'html',
-      createdAt: '2025-10-23T18:56:00Z',
-      updatedAt: '2025-10-23T18:56:00Z',
-      publishedAt: '2025-10-23T18:56:00Z'
-    },
-    {
-      _id: '2',
-      title: 'Stay updated with the latest news, updates and promotions',
-      content: '<p>Get the latest updates about our new features, promotions, and announcements.</p>',
-      summary: 'Get the latest updates about our new features, promotions, and announcements.',
-      category: 'update',
-      priority: 'normal',
-      status: 'published',
-      tags: [],
-      author: {
-        _id: '1',
-        name: 'Admin',
-        email: 'admin@example.com'
-      },
-      expiresAt: '2027-12-31T00:00:00.000Z',
-      isPinned: false,
-      viewCount: 0,
-      contentType: 'html',
-      createdAt: '2025-10-28T14:24:54Z',
-      updatedAt: '2025-10-28T14:24:54Z',
-      publishedAt: '2025-10-28T14:24:54Z'
-    }
-  ];
-
-  if (isLoading && !isAuthenticated) {
-    return (
-      <div className="min-h-screen relative overflow-hidden p-0 m-0" style={{ backgroundColor: '#232426' }}>
-        <div className="relative z-10">
-          <TopSection showLogo={true} />
-        </div>
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-white text-xl">Loading news...</div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error && newsData.length === 0) {
-    return (
-      <div className="min-h-screen relative overflow-hidden p-0 m-0" style={{ backgroundColor: '#232426' }}>
-        <div className="relative z-10">
-          <TopSection showLogo={true} />
-        </div>
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-white text-xl">{error}</div>
-        </div>
-      </div>
-    );
-  }
-
-  // Sort news items: pinned first, then by date
-  const sortedNews = [...newsData].sort((a, b) => {
-    if (a.isPinned && !b.isPinned) return -1;
-    if (!a.isPinned && b.isPinned) return 1;
-    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-  });
 
   return (
-    <div className="min-h-screen relative overflow-hidden p-0 m-0" style={{ backgroundColor: '#232426' }}>
-      {/* Desktop Container */}
-      <div className="w-full">
-        <div className="relative z-10">
-          <TopSection showLogo={true} onNavigate={onNavigate} />
-        </div>
+    <div className="min-h-screen bg-[#141517] font-sans selection:bg-indigo-500/30">
+      {/* Top Section */}
+      <div className="sticky top-0 z-40 bg-[#141517]/80 backdrop-blur-md border-b border-white/5">
+        <TopSection showLogo={true} onNavigate={onNavigate} />
 
-
-        {/* Page Title */}
-        <div className="px-4 md:px-6 lg:px-8 mb-6">
-          <h1 className="text-white font-bold text-xl sm:text-2xl">News & Announcements</h1>
-          <p className="text-gray-400 text-sm mt-2">Stay updated with the latest news, updates and promotions</p>
-        </div>
-
-        {/* News Content */}
-        <div className="px-4 md:px-6 lg:px-8 pb-24">
-          {sortedNews.length === 0 ? (
-            <div className="text-center py-16">
-              <div className="text-white text-lg mb-2">No news available</div>
-              <div className="text-gray-400 text-sm">Check back later for updates</div>
+        {/* Header & Filter Bar */}
+        <div className="px-4 md:px-8 py-4">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-4">
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight flex items-center gap-3">
+                <span className="p-2 rounded-lg bg-indigo-500/10 text-indigo-400">
+                  <FaNewspaper />
+                </span>
+                Newsroom
+              </h1>
+              <p className="text-gray-400 text-sm mt-1 max-w-lg">
+                Stay updated with the latest announcements, maintenance schedules, and exclusive promotions.
+              </p>
             </div>
-          ) : (
-            <div className="space-y-4">
-              {sortedNews.map((item) => (
-                <div
-                  key={item._id}
-                  className="p-4 rounded-lg cursor-pointer transition-opacity hover:opacity-90"
-                  style={{
-                    background: 'linear-gradient(90deg, rgb(127, 140, 170) 0%, rgb(92, 102, 124) 100%)',
-                    boxShadow: '0px 4px 4px 0px #00000040'
-                  }}
-                  onClick={() => toggleExpand(item._id)}
+          </div>
+
+          {/* Filters */}
+          <div className="flex flex-col sm:flex-row gap-3 overflow-x-auto pb-2 scrollbar-hide">
+            {/* Category Filter */}
+            <div className="flex bg-[#1E2023] p-1 rounded-xl border border-white/5 w-max">
+              {categories.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedCategory(cat.toLowerCase())}
+                  className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 whitespace-nowrap ${selectedCategory === cat.toLowerCase()
+                    ? 'bg-[#2A2D31] text-white shadow-sm ring-1 ring-white/10'
+                    : 'text-gray-500 hover:text-gray-300 hover:bg-white/5'
+                    }`}
                 >
-                  <div className="flex items-start gap-4">
-                    {/* Icon */}
-                    <div className="w-12 h-12 rounded-full bg-gray-300 shrink-0 flex items-center justify-center">
-                      {item.isPinned ? (
-                        <svg className="w-8 h-8 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
-                          <path d="M10 2L3 9v9a1 1 0 001 1h12a1 1 0 001-1V9l-7-7z" />
-                        </svg>
-                      ) : (
-                        <svg className="w-8 h-8 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                        </svg>
-                      )}
-                    </div>
-
-                    {/* Details */}
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="font-bold text-base mb-1 text-white capitalize">{item.category}</span>
-                        {item.isPinned && (
-                          <span className="text-xs text-gray-300">• Pinned</span>
-                        )}
-                      </div>
-                      <div className="text-white text-sm mb-1">{item.title}</div>
-                      <div className="text-gray-300 text-xs">{formatDate(item.createdAt)}</div>
-
-                      {/* Expanded Description */}
-                      {expandedItems.has(item._id) && (
-                        <div className="mt-3 pt-3 border-t border-white border-opacity-20">
-                          {item.contentType === 'html' ? (
-                            <div
-                              className="text-white text-sm leading-relaxed"
-                              style={{ fontFamily: 'Poppins' }}
-                              dangerouslySetInnerHTML={{ __html: item.content }}
-                            />
-                          ) : (
-                            <p className="text-white text-sm leading-relaxed" style={{ fontFamily: 'Poppins' }}>
-                              {item.content}
-                            </p>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
+                  {cat}
+                </button>
               ))}
             </div>
-          )}
+
+            {/* Priority Filter (Optional/Secondary) */}
+            <div className="flex items-center gap-2 px-3 py-1 bg-[#1E2023] rounded-xl border border-white/5 w-max">
+              <FaFilter className="text-gray-500 text-xs" />
+              <span className="text-xs text-gray-400 font-medium mr-1">Priority:</span>
+              {priorities.map((prio) => (
+                <button
+                  key={prio}
+                  onClick={() => setSelectedPriority(prio.toLowerCase())}
+                  className={`px-2 py-1 rounded text-[10px] uppercase font-bold tracking-wider transition-colors ${selectedPriority === prio.toLowerCase()
+                    ? 'text-indigo-400 bg-indigo-500/10'
+                    : 'text-gray-600 hover:text-gray-400'
+                    }`}
+                >
+                  {prio}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
-
-        {/* Bottom Spacing for Fixed Navigation */}
-        <div className="h-15"></div>
-
-        {/* Bottom Navigation */}
-        <BottomNavigation />
       </div>
+
+      {/* Content Area */}
+      <div className="px-4 md:px-8 py-6 pb-32 max-w-7xl mx-auto">
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="bg-[#1E2023] rounded-2xl h-80 animate-pulse border border-white/5">
+                <div className="h-40 bg-white/5 rounded-t-2xl mb-4"></div>
+                <div className="px-5 space-y-3">
+                  <div className="h-4 bg-white/10 rounded w-3/4"></div>
+                  <div className="h-4 bg-white/10 rounded w-1/2"></div>
+                  <div className="h-16 bg-white/5 rounded w-full mt-4"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : filteredNews.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <div className="w-20 h-20 bg-[#1E2023] rounded-full flex items-center justify-center mb-4">
+              <FaNewspaper className="text-gray-600 text-3xl" />
+            </div>
+            <h3 className="text-white text-lg font-medium">No news found</h3>
+            <p className="text-gray-500 text-sm mt-1">Try adjusting your filters used above.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr">
+            {filteredNews.map((item) => (
+              <div
+                key={item._id}
+                onClick={() => setSelectedNews(item)}
+                className="bg-[#1E2023]/80 backdrop-blur-sm group border border-white/5 hover:border-indigo-500/30 rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-2xl hover:shadow-indigo-500/10 hover:-translate-y-1 flex flex-col"
+              >
+                {/* Image Header */}
+                <div className="relative h-48 w-full bg-[#2A2D31] overflow-hidden">
+                  {item.image ? (
+                    <img
+                      src={item.image}
+                      alt={item.title}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = 'none';
+                        (e.currentTarget.parentElement as HTMLElement).classList.add('flex', 'items-center', 'justify-center');
+                      }}
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#23252a] to-[#1a1c20]">
+                      <FaNewspaper className="text-white/5 text-6xl transform -rotate-12 group-hover:rotate-0 transition-transform duration-500" />
+                    </div>
+                  )}
+
+                  {/* Badges Overlay */}
+                  <div className="absolute top-3 left-3 flex gap-2">
+                    <span className={`px-2.5 py-1 rounded-lg text-[10px] uppercase font-bold tracking-wider backdrop-blur-md border ${getCategoryColor(item.category)} shadow-lg`}>
+                      {item.category}
+                    </span>
+                    {item.priority !== 'low' && (
+                      <span className={`px-2.5 py-1 rounded-lg text-[10px] uppercase font-bold tracking-wider backdrop-blur-md border ${getPriorityColor(item.priority)} shadow-lg`}>
+                        {item.priority}
+                      </span>
+                    )}
+                  </div>
+
+                  {item.isPinned && (
+                    <div className="absolute top-3 right-3 bg-yellow-500 text-black p-1.5 rounded-full shadow-lg shadow-yellow-500/20 z-10">
+                      <div className="bg-yellow-400 p-1 rounded-full">
+                        <span className="sr-only">Pinned</span>
+                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M10 2L3 9v9a1 1 0 001 1h12a1 1 0 001-1V9l-7-7z" />
+                        </svg>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Content */}
+                <div className="p-5 flex-1 flex flex-col">
+                  <div className="flex items-center gap-2 text-xs text-gray-500 mb-3">
+                    <span className="flex items-center gap-1.5">
+                      <FaCalendarAlt className="text-gray-600" />
+                      {formatDate(item.createdAt)}
+                    </span>
+                    {item.author && (
+                      <>
+                        <span className="w-1 h-1 rounded-full bg-gray-700"></span>
+                        <span className="flex items-center gap-1.5 truncate max-w-[100px]">
+                          <FaUser className="text-gray-600" />
+                          {item.author.name}
+                        </span>
+                      </>
+                    )}
+                  </div>
+
+                  <h3 className="text-lg font-bold text-white mb-2 leading-tight group-hover:text-indigo-400 transition-colors line-clamp-2">
+                    {item.title}
+                  </h3>
+
+                  <p className="text-gray-400 text-sm line-clamp-3 mb-4 leading-relaxed flex-1">
+                    {item.summary || "No summary available."}
+                  </p>
+
+                  <div className="pt-4 mt-auto border-t border-white/5 flex items-center justify-between">
+                    <div className="flex gap-2">
+                      {item.tags.slice(0, 2).map(tag => (
+                        <span key={tag} className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 text-gray-400 border border-white/5">
+                          #{tag}
+                        </span>
+                      ))}
+                    </div>
+                    <span className="text-indigo-400 text-xs font-semibold group-hover:underline">Read More →</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Modal for Details */}
+      {selectedNews && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setSelectedNews(null)}>
+          <div
+            className="bg-[#1E2023] w-full max-w-2xl max-h-[85vh] rounded-2xl shadow-2xl overflow-hidden border border-white/10 flex flex-col animate-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header Image */}
+            <div className="relative h-48 sm:h-64 bg-[#2A2D31] shrink-0">
+              {selectedNews.image ? (
+                <img src={selectedNews.image} alt={selectedNews.title} className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#23252a] to-[#141517]">
+                  <FaNewspaper className="text-white/10 text-6xl" />
+                </div>
+              )}
+              <button
+                onClick={() => setSelectedNews(null)}
+                className="absolute top-4 right-4 bg-black/50 hover:bg-black/80 text-white p-2 rounded-full backdrop-blur-md transition-colors border border-white/10"
+              >
+                <FaTimes />
+              </button>
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[#1E2023] to-transparent h-24"></div>
+              <div className="absolute bottom-4 left-6 right-6">
+                <div className="flex flex-wrap gap-2 mb-2">
+                  <span className={`px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wider backdrop-blur-md border ${getCategoryColor(selectedNews.category)}`}>
+                    {selectedNews.category}
+                  </span>
+                  {selectedNews.priority !== 'low' && (
+                    <span className={`px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wider backdrop-blur-md border ${getPriorityColor(selectedNews.priority)}`}>
+                      {selectedNews.priority}
+                    </span>
+                  )}
+                </div>
+                <h2 className="text-2xl font-bold text-white leading-tight shadow-black drop-shadow-lg pr-4">
+                  {selectedNews.title}
+                </h2>
+              </div>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 overflow-y-auto custom-scrollbar">
+              <div className="flex items-center gap-4 text-sm text-gray-400 mb-6 pb-4 border-b border-white/5">
+                <span className="flex items-center gap-2">
+                  <FaCalendarAlt className="text-indigo-400" />
+                  {formatDate(selectedNews.createdAt)}
+                </span>
+                {selectedNews.author && (
+                  <span className="flex items-center gap-2">
+                    <FaUser className="text-indigo-400" />
+                    {selectedNews.author.name}
+                  </span>
+                )}
+                <span className="flex items-center gap-2">
+                  <FaTag className="text-indigo-400" />
+                  {selectedNews.tags.join(', ') || 'News'}
+                </span>
+              </div>
+
+              {/* Content Render */}
+              <div className="prose prose-invert prose-sm sm:prose-base max-w-none text-gray-300">
+                {selectedNews.contentType === 'html' ? (
+                  <div
+                    dangerouslySetInnerHTML={{ __html: selectedNews.content }}
+                    className="news-content-html space-y-4 leading-relaxed"
+                  />
+                ) : (
+                  <p className="whitespace-pre-wrap leading-relaxed">{selectedNews.content}</p>
+                )}
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-4 bg-[#141517] border-t border-white/5 flex justify-end shrink-0">
+              <button
+                onClick={() => setSelectedNews(null)}
+                className="px-6 py-2 bg-white/5 hover:bg-white/10 text-white rounded-lg transition-colors font-medium text-sm border border-white/5"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <BottomNavigation />
     </div>
   );
 }
